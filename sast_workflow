@@ -1,0 +1,40 @@
+name: SAST and Code Quality
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build:
+        container:
+            image: alpine
+
+        steps:
+          - name: "Checkout code"
+            uses: actions/checkout@v2
+        
+          - name: "Set up Java"
+            uses: actions/setup-java@v2
+            with:
+              java-version: '11'
+        
+          - name: Build with Maven
+            run: mvn clean install
+        
+          - name: SonarQube Scan
+            uses: sonarsource/sonarqube-scan-action@v1
+            with:
+              sonar-token: ${{ secrets.SONAR_TOKEN }}
+              project-key: ${{ github.repository }}
+              project-name: My Project
+              project-version: 1.0
+              sources: src
+              exclusions: '**/vendor/**'
+        
+          - name: SAST Scan
+            run: |
+              # Run your SAST tool here
+              # Example: npm run sast
